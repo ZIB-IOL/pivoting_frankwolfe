@@ -61,49 +61,44 @@ const max_iteration = 5000
 const NO_KSPARSE = false
 
 for tau in (20.0, 30.0, 35.0, 40.0, 60.0, 70.0)
-        f, grad! = build_objective_gradient(df, labels)
-        for K in (10, 3)
-            # other f, grad! for K-sparse, conditioning is too bad otherwise
-            f, grad! = build_objective_gradient(df / 50, labels)
-            if NO_KSPARSE
-                break
-            end
-            res_file = if SCALED
-                joinpath(@__DIR__, "results", "logreg_ksparse_$(Int(mu))_$(Int(tau))_$K.json")
-            else
-                joinpath(@__DIR__, "results", "logreg_ksparse_unscaled_$(Int(mu))_$(Int(tau))_$K.json")
-            end
-            if isfile(res_file)
-                continue
-            end
-            # creating the file to avoid another job running on the same instance
-            touch(res_file)
-            @info "Running Ksparse $tau $mu $K"
-            lmo_k = FrankWolfe.KSparseLMO(K, 0.5 * tau / K)
-            xk0 = FrankWolfe.compute_extreme_point(lmo_k, randn(size(df, 2)))
-            res_cgafw = []
-            CardinalityGuaranteedFrankWolfe.cardinality_guaranteed_away_frank_wolfe(f, grad!, lmo_k, xk0, verbose=true, lazy=true, max_iteration=max_iteration, callback=CardinalityGuaranteedFrankWolfe.make_trajectory_with_active_set(res_cgafw), gradient=collect(xk0), full_solve=true)
-            res_afw = []
-            FrankWolfe.away_frank_wolfe(f, grad!, lmo_k, xk0, verbose=false, lazy=true, max_iteration=max_iteration, callback=CardinalityGuaranteedFrankWolfe.make_trajectory_with_active_set(res_afw), gradient=collect(xk0))
-            res_bpcg = []
-            FrankWolfe.blended_pairwise_conditional_gradient(f, grad!, lmo_k, xk0, verbose=false, lazy=true, max_iteration=max_iteration, callback=CardinalityGuaranteedFrankWolfe.make_trajectory_with_active_set(res_bpcg), gradient=collect(xk0))
-            all_results = Dict(
-                "tau" => tau,
-                "K" => K,
-                "cg_afw" => res_cgafw,
-                "afw" => res_afw,
-                "bpcg" => res_bpcg,
-            )
-            open(res_file, "w") do f
-                write(f, JSON.json(all_results, 4))
-            end
+    f, grad! = build_objective_gradient(df, labels)
+    for K in (10, 3)
+        # other f, grad! for K-sparse, conditioning is too bad otherwise
+        f, grad! = build_objective_gradient(df / 50, labels)
+        if NO_KSPARSE
+            break
         end
-        res_file = joinpath(@__DIR__, "results", "logreg_$(Int(mu))_$(Int(tau)).json")
+        res_file = joinpath(@__DIR__, "results", "logreg_ksparse_$(Int(tau))_$K.json")
+        if isfile(res_file)
+            continue
+        end
+        # creating the file to avoid another job running on the same instance
+        touch(res_file)
+        @info "Running Ksparse $tau $K"
+        lmo_k = FrankWolfe.KSparseLMO(K, 0.5 * tau / K)
+        xk0 = FrankWolfe.compute_extreme_point(lmo_k, randn(size(df, 2)))
+        res_cgafw = []
+        CardinalityGuaranteedFrankWolfe.cardinality_guaranteed_away_frank_wolfe(f, grad!, lmo_k, xk0, verbose=true, lazy=true, max_iteration=max_iteration, callback=CardinalityGuaranteedFrankWolfe.make_trajectory_with_active_set(res_cgafw), gradient=collect(xk0), full_solve=true)
+        res_afw = []
+        FrankWolfe.away_frank_wolfe(f, grad!, lmo_k, xk0, verbose=false, lazy=true, max_iteration=max_iteration, callback=CardinalityGuaranteedFrankWolfe.make_trajectory_with_active_set(res_afw), gradient=collect(xk0))
+        res_bpcg = []
+        FrankWolfe.blended_pairwise_conditional_gradient(f, grad!, lmo_k, xk0, verbose=false, lazy=true, max_iteration=max_iteration, callback=CardinalityGuaranteedFrankWolfe.make_trajectory_with_active_set(res_bpcg), gradient=collect(xk0))
+        all_results = Dict(
+            "tau" => tau,
+            "K" => K,
+            "cg_afw" => res_cgafw,
+            "afw" => res_afw,
+            "bpcg" => res_bpcg,
+        )
+        open(res_file, "w") do f
+            write(f, JSON.json(all_results, 4))
+        end
+        res_file = joinpath(@__DIR__, "results", "logreg_$(Int(tau)).json")
         if isfile(res_file)
             continue
         end
         touch(res_file)
-        @info "Running L1 logreg $tau $mu"
+        @info "Running L1 logreg $tau"
         lmo = FrankWolfe.LpNormLMO{1}(tau)
         x0 = FrankWolfe.compute_extreme_point(lmo, randn(size(df, 2)))
         res_cgafw = []
