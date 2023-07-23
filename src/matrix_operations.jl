@@ -120,12 +120,13 @@ function fw_update!(M, F, v, λ, η, k_v = 0; full_solve=false)
             -BasicLU.solve(F, vs, 'N')
         end
         if norm(M * r + vs) > 1e-9
-            @info "full $full_solve"
-            @info det(M)
-            @info (norm(M * r + vs))
-            @info norm(M *  (M \ collect(vs)) - vs)
+            @error("Sparse linear system could not be solved")
+            @show "full $full_solve"
+            @show det(M)
+            @show (norm(M * r + vs))
+            @show norm(M *  (M \ collect(vs)) - vs)
             r2 = -M\collect(vs)
-            @info norm(r-r2)
+            @show norm(r-r2)
             error(norm(M * r + vs))
         end
         # θ, k = findmin(r[i] < 0 ? -λ[i] / r[i] : Inf for i in 1:n)
