@@ -1,0 +1,30 @@
+name = "CardinalityGuaranteedFrankWolfe"
+uuid = "60583d18-e443-4e90-b00a-4482861f2acc"
+authors = ["ZIB AISST"]
+version = "0.1.0"
+
+[deps]
+BasicLU = "f55c55da-c227-4c78-8e30-b72a48476979"
+DelimitedFiles = "8bb1440f-4735-579b-a4ab-409b98df4dab"
+FrankWolfe = "f55ce6ea-fdc5-4628-88c5-0087fe54bd30"
+JSON = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
+LaTeXStrings = "b964fa9f-0449-5b57-a5c2-d3ea65f4040f"
+LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+MAT = "23992714-dd62-5051-b70f-ba57cb901cac"
+Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
+Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
+SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
+
+[compat]
+BasicLU = "0.2"
+DelimitedFiles = "1.9"
+FrankWolfe = "0.2.17"
+LaTeXStrings = "1.3"
+MAT = "0.10"
+julia = "1.9"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]
