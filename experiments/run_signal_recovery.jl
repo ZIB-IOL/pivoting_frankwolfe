@@ -1,4 +1,4 @@
-using CardinalityGuaranteedFrankWolfe
+using PivotingFrankWolfe
 using FrankWolfe
 using LinearAlgebra
 using JSON
@@ -55,9 +55,9 @@ const f1, grad1! = build_objective_gradient(y, hcat(A, A))
 for (f0, grad0!, x0, xk0_prec) in ((f, grad!, x0, xk0_prec), (f1, grad1!, x0_ill, xk0_prec_ill))
     @info "standard"
     @info "$(size(xk0_prec))"
-    CardinalityGuaranteedFrankWolfe.cardinality_guaranteed_away_frank_wolfe(f0, grad0!, lmo0, x0, verbose=false, lazy=true, max_iteration=3, callback=CardinalityGuaranteedFrankWolfe.make_trajectory_with_active_set([]))
-    FrankWolfe.away_frank_wolfe(f0, grad0!, lmo0, x0, verbose=false, lazy=true, trajectory=true, max_iteration=3, callback=CardinalityGuaranteedFrankWolfe.make_trajectory_with_active_set([]))
-    FrankWolfe.blended_pairwise_conditional_gradient(f0, grad0!, lmo0, x0, verbose=false, lazy=true, max_iteration=3, callback=CardinalityGuaranteedFrankWolfe.make_trajectory_with_active_set([]))
+    PivotingFrankWolfe.pivoting_away_frank_wolfe(f0, grad0!, lmo0, x0, verbose=false, lazy=true, max_iteration=3, callback=PivotingFrankWolfe.make_trajectory_with_active_set([]))
+    FrankWolfe.away_frank_wolfe(f0, grad0!, lmo0, x0, verbose=false, lazy=true, trajectory=true, max_iteration=3, callback=PivotingFrankWolfe.make_trajectory_with_active_set([]))
+    FrankWolfe.blended_pairwise_conditional_gradient(f0, grad0!, lmo0, x0, verbose=false, lazy=true, max_iteration=3, callback=PivotingFrankWolfe.make_trajectory_with_active_set([]))
     # similar for K-sparse polytope
     # 
 end
@@ -75,11 +75,11 @@ for tau_frac in (5, 20, 80, 100, 120, 150)
     @info "Running L1 signal recovery $tau_frac"
     lmo = FrankWolfe.LpNormLMO{1}(tau / tau_frac)
     res_cgafw = []
-    CardinalityGuaranteedFrankWolfe.cardinality_guaranteed_away_frank_wolfe(f, grad!, lmo, x0, verbose=false, lazy=true, max_iteration=max_iteration, callback=CardinalityGuaranteedFrankWolfe.make_trajectory_with_active_set(res_cgafw), full_solve=true)
+    PivotingFrankWolfe.pivoting_away_frank_wolfe(f, grad!, lmo, x0, verbose=false, lazy=true, max_iteration=max_iteration, callback=PivotingFrankWolfe.make_trajectory_with_active_set(res_cgafw), full_solve=true)
     res_afw = []
-    FrankWolfe.away_frank_wolfe(f, grad!, lmo, x0, verbose=false, lazy=true, max_iteration=max_iteration, callback=CardinalityGuaranteedFrankWolfe.make_trajectory_with_active_set(res_afw))
+    FrankWolfe.away_frank_wolfe(f, grad!, lmo, x0, verbose=false, lazy=true, max_iteration=max_iteration, callback=PivotingFrankWolfe.make_trajectory_with_active_set(res_afw))
     res_bpcg = []
-    FrankWolfe.blended_pairwise_conditional_gradient(f, grad!, lmo, x0, verbose=false, lazy=true, max_iteration=max_iteration, callback=CardinalityGuaranteedFrankWolfe.make_trajectory_with_active_set(res_bpcg))
+    FrankWolfe.blended_pairwise_conditional_gradient(f, grad!, lmo, x0, verbose=false, lazy=true, max_iteration=max_iteration, callback=PivotingFrankWolfe.make_trajectory_with_active_set(res_bpcg))
     all_results = Dict(
         "tau_frac" => tau_frac,
         "tau" => tau,
@@ -102,11 +102,11 @@ if ILL_CONDITIONED_VARIANT
         @info "Running L1 ill-conditioned signal recovery $tau_frac"
         lmo = FrankWolfe.LpNormLMO{1}(tau / tau_frac)
         res_cgafw = []
-        CardinalityGuaranteedFrankWolfe.cardinality_guaranteed_away_frank_wolfe(f1, grad1!, lmo, x0_ill, verbose=false, lazy=true, max_iteration=max_iteration, callback=CardinalityGuaranteedFrankWolfe.make_trajectory_with_active_set(res_cgafw), full_solve=true)
+        PivotingFrankWolfe.pivoting_away_frank_wolfe(f1, grad1!, lmo, x0_ill, verbose=false, lazy=true, max_iteration=max_iteration, callback=PivotingFrankWolfe.make_trajectory_with_active_set(res_cgafw), full_solve=true)
         res_afw = []
-        FrankWolfe.away_frank_wolfe(f1, grad1!, lmo, x0_ill, verbose=false, lazy=true, max_iteration=max_iteration, callback=CardinalityGuaranteedFrankWolfe.make_trajectory_with_active_set(res_afw))
+        FrankWolfe.away_frank_wolfe(f1, grad1!, lmo, x0_ill, verbose=false, lazy=true, max_iteration=max_iteration, callback=PivotingFrankWolfe.make_trajectory_with_active_set(res_afw))
         res_bpcg = []
-        FrankWolfe.blended_pairwise_conditional_gradient(f1, grad1!, lmo, x0_ill, verbose=false, lazy=true, max_iteration=max_iteration, callback=CardinalityGuaranteedFrankWolfe.make_trajectory_with_active_set(res_bpcg))
+        FrankWolfe.blended_pairwise_conditional_gradient(f1, grad1!, lmo, x0_ill, verbose=false, lazy=true, max_iteration=max_iteration, callback=PivotingFrankWolfe.make_trajectory_with_active_set(res_bpcg))
         all_results = Dict(
             "tau_frac" => tau_frac,
             "tau" => tau,

@@ -1,6 +1,6 @@
 using FrankWolfe: fast_dot
 
-function cardinality_guaranteed_away_frank_wolfe(
+function pivoting_away_frank_wolfe(
     f,
     grad!,
     lmo,

@@ -1,4 +1,4 @@
-using CardinalityGuaranteedFrankWolfe
+using PivotingFrankWolfe
 using Test
 using FrankWolfe
 using LinearAlgebra
@@ -9,7 +9,7 @@ using LinearAlgebra
     f(x) = 1/2 * norm(x)^2
     grad!(storage, x) = storage .= x
     x0 = FrankWolfe.compute_extreme_point(lmo, zeros(n))
-    res = CardinalityGuaranteedFrankWolfe.cardinality_guaranteed_away_frank_wolfe(f, grad!, lmo, x0, verbose=true, lazy=true)
+    res = PivotingFrankWolfe.pivoting_away_frank_wolfe(f, grad!, lmo, x0, verbose=true, lazy=true)
     res_away = FrankWolfe.away_frank_wolfe(f, grad!, lmo, x0, verbose=true, lazy=true)
     res_pairwise = FrankWolfe.blended_pairwise_conditional_gradient(f, grad!, lmo, x0, verbose=true, lazy=true)
 end
@@ -24,9 +24,9 @@ end
         storage .= x
         storage .-= 1
     end
-    M = CardinalityGuaranteedFrankWolfe.construct_initial_matrix_and_lambda(x0)[1]
+    M = PivotingFrankWolfe.construct_initial_matrix_and_lambda(x0)[1]
     x0 = FrankWolfe.compute_extreme_point(lmo, zeros(n))
-    res = CardinalityGuaranteedFrankWolfe.cardinality_guaranteed_away_frank_wolfe(f, grad!, lmo, x0, verbose=true, lazy=true, line_search=FrankWolfe.Adaptive(verbose=false), max_iteration=3000)
+    res = PivotingFrankWolfe.pivoting_away_frank_wolfe(f, grad!, lmo, x0, verbose=true, lazy=true, line_search=FrankWolfe.Adaptive(verbose=false), max_iteration=3000)
     res_away = FrankWolfe.away_frank_wolfe(f, grad!, lmo, x0, verbose=true, lazy=true)
     res_pairwise = FrankWolfe.blended_pairwise_conditional_gradient(f, grad!, lmo, x0, verbose=true, lazy=true)
 end

@@ -1,10 +1,10 @@
-# Controlling Active Set Size in Frank-Wolfe Algorithms: A Cardinality-Guaranteed Framework with Feasible Region Dimension Bound
+# The Pivoting Framework: Frank-Wolfe Algorithms with Active Set Size Control
 
 ## References
 
 This is the accompanying repository for the paper:
 
-> Wirth, E., Besançon, M., and Pokutta, S. (2023). Controlling Active Set Size in Frank-Wolfe Algorithms: A Cardinality-Guaranteed Framework with Feasible Region Dimension Bound.
+> Wirth, E., Besançon, M., and Pokutta, S. (2023). The Pivoting Framework: Frank-Wolfe Algorithms with Active Set Size Control.
 
 ## Installation guide
 
@@ -15,7 +15,7 @@ import Pkg
 Pkg.activate(".")
 Pkg.update()
 
-import CardinalityGuaranteedFrankWolfe
+import PivotingFrankWolfe
 ```
 
 See the [Julia documentation](https://docs.julialang.org/en/v1/stdlib/Pkg/) for more detail on working with the Julia package manager.
