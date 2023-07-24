@@ -1,7 +1,7 @@
 using MAT
 using LinearAlgebra
 using FrankWolfe
-using CardinalityGuaranteedFrankWolfe
+using PivotingFrankWolfe
 using Random
 using JSON
 
@@ -41,9 +41,9 @@ const lmo = FrankWolfe.ProbabilitySimplexOracle(1.0)
 const x0_prec = FrankWolfe.compute_extreme_point(lmo, ones(size(raw_data[1], 1)))
 
 # precompiling everything
-CardinalityGuaranteedFrankWolfe.cardinality_guaranteed_away_frank_wolfe(f0, grad!0, lmo, x0_prec, verbose=false, lazy=true, max_iteration=3, callback=CardinalityGuaranteedFrankWolfe.make_trajectory_with_active_set([]))
-FrankWolfe.away_frank_wolfe(f0, grad!0, lmo, x0_prec, verbose=false, lazy=true, trajectory=true, max_iteration=3, callback=CardinalityGuaranteedFrankWolfe.make_trajectory_with_active_set([]))
-FrankWolfe.blended_pairwise_conditional_gradient(f0, grad!0, lmo, x0_prec, verbose=false, lazy=true, max_iteration=3, callback=CardinalityGuaranteedFrankWolfe.make_trajectory_with_active_set([]))
+PivotingFrankWolfe.pivoting_away_frank_wolfe(f0, grad!0, lmo, x0_prec, verbose=false, lazy=true, max_iteration=3, callback=PivotingFrankWolfe.make_trajectory_with_active_set([]))
+FrankWolfe.away_frank_wolfe(f0, grad!0, lmo, x0_prec, verbose=false, lazy=true, trajectory=true, max_iteration=3, callback=PivotingFrankWolfe.make_trajectory_with_active_set([]))
+FrankWolfe.blended_pairwise_conditional_gradient(f0, grad!0, lmo, x0_prec, verbose=false, lazy=true, max_iteration=3, callback=PivotingFrankWolfe.make_trajectory_with_active_set([]))
 
 const max_iteration = 10000
 
@@ -57,11 +57,11 @@ for (i, df) in enumerate(raw_data)
     @info "Running portfolio $i"
     x0 = FrankWolfe.compute_extreme_point(lmo, ones(size(df, 1)))
     res_cgafw = []
-    CardinalityGuaranteedFrankWolfe.cardinality_guaranteed_away_frank_wolfe(f, grad!, lmo, x0, line_search=FrankWolfe.MonotonicStepSize(), verbose=false, lazy=true, max_iteration=max_iteration, callback=CardinalityGuaranteedFrankWolfe.make_trajectory_with_active_set(res_cgafw), full_solve=true)
+    PivotingFrankWolfe.pivoting_away_frank_wolfe(f, grad!, lmo, x0, line_search=FrankWolfe.MonotonicStepSize(), verbose=false, lazy=true, max_iteration=max_iteration, callback=PivotingFrankWolfe.make_trajectory_with_active_set(res_cgafw), full_solve=true)
     res_afw = []
-    FrankWolfe.away_frank_wolfe(f, grad!, lmo, x0, verbose=false, lazy=true, max_iteration=max_iteration, callback=CardinalityGuaranteedFrankWolfe.make_trajectory_with_active_set(res_afw))
+    FrankWolfe.away_frank_wolfe(f, grad!, lmo, x0, verbose=false, lazy=true, max_iteration=max_iteration, callback=PivotingFrankWolfe.make_trajectory_with_active_set(res_afw))
     res_bpcg = []
-    FrankWolfe.blended_pairwise_conditional_gradient(f, grad!, lmo, x0, verbose=false, lazy=false, max_iteration=max_iteration, callback=CardinalityGuaranteedFrankWolfe.make_trajectory_with_active_set(res_bpcg))
+    FrankWolfe.blended_pairwise_conditional_gradient(f, grad!, lmo, x0, verbose=false, lazy=false, max_iteration=max_iteration, callback=PivotingFrankWolfe.make_trajectory_with_active_set(res_bpcg))
     all_results = Dict(
         "cg_afw" => res_cgafw,
         "afw" => res_afw,
