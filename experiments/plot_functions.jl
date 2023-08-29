@@ -1,7 +1,7 @@
 using Plots
 using LaTeXStrings
 
-function plot_sparsity(data, label; filename=nothing, xscalelog=false, legend_position=:topright, lstyle=fill(:solid, length(label)),width=1.5,shift=true)
+function plot_sparsity(data, label; filename=nothing, xscalelog=false, legend_position=:topright, lstyle=fill(:solid, length(label)),width=1.5,shift=true,colors)
     # theme(:dark)
     # theme(:vibrant)
     gr()
@@ -17,7 +17,7 @@ function plot_sparsity(data, label; filename=nothing, xscalelog=false, legend_po
         x = [trajectory[j][6] for j in offset:length(trajectory)]
         y = [trajectory[j][2] for j in offset:length(trajectory)]
         if shift
-            y .-= (minimum(y) - 1e-5)
+            y .-= (minimum(y) - 1e-9)
         end
         if i == 1
             ps = plot(
@@ -31,11 +31,13 @@ function plot_sparsity(data, label; filename=nothing, xscalelog=false, legend_po
                 linestyle=lstyle[i],
                 yguidefontsize=12,
                 xguidefontsize=12,
-                legendfontsize=8,
-                width=width,
+                legendfontsize=6,
+                width=(width + 0.01 * i),
+                alpha=1,
+                color=colors[i],
             )
         else
-            plot!(x, y, label=label[i], linestyle=lstyle[i], width=width)
+            plot!(x, y, label=label[i], linestyle=lstyle[i], width=(width + 0.01 * i), alpha=1, color=colors[i])
         end
     end
     for i in eachindex(data)
@@ -54,10 +56,12 @@ function plot_sparsity(data, label; filename=nothing, xscalelog=false, legend_po
                 ylabel=L"\textrm{Dual\ gap}",
                 yguidefontsize=12,
                 xguidefontsize=12,
-                width=width,
+                width=(width + 0.01 * i),
+                alpha=1,
+                color=colors[i],
             )
         else
-            plot!(x, y, label=label[i], linestyle=lstyle[i], width=width)
+            plot!(x, y, label=label[i], linestyle=lstyle[i], width=(width + 0.01 * i), alpha=1, color=colors[i])
         end
     end
     
@@ -67,7 +71,9 @@ function plot_sparsity(data, label; filename=nothing, xscalelog=false, legend_po
     if filename !== nothing
         savefig(fp, filename)
     end
-    return fp
+    p_dual = plot(ds, legend=true)
+    xlabel!(p_dual, L"\textrm{Active\ set\ cardinality}")
+    return fp, p_dual
 end
 
 
@@ -80,6 +86,7 @@ function plot_trajectories(
     lstyle=fill(:solid, length(data)),
     width=1.5,
     shift=true,
+    colors,
 )
     # theme(:dark)
     # theme(:vibrant)
@@ -98,7 +105,7 @@ function plot_trajectories(
         x = [trajectory[j][1] for j in offset:length(trajectory)]
         y = [trajectory[j][2] for j in offset:length(trajectory)]
         if shift
-            y .-= (minimum(y) - 1e-5)
+            y .-= (minimum(y) - 1e-9)
         end
         if i == 1
             pit = plot(
@@ -111,12 +118,14 @@ function plot_trajectories(
                 legend=legend_position,
                 yguidefontsize=12,
                 xguidefontsize=12,
-                legendfontsize=8,
-                width=width,
+                legendfontsize=6,
+                width=(width + 0.01 * i),
+                alpha=1,
                 linestyle=lstyle[i],
+                color=colors[i],
             )
         else
-            plot!(x, y, label=label[i], width=width, linestyle=lstyle[i])
+            plot!(pit, x, y, label=label[i], width=(width + 0.01 * i), linestyle=lstyle[i], color=colors[i], alpha=1,)
         end
     end
     for i in 1:length(data)
@@ -124,7 +133,7 @@ function plot_trajectories(
         x = [trajectory[j][5] for j in offset:length(trajectory)]
         y = [trajectory[j][2] for j in offset:length(trajectory)]
         if shift
-            y .-= (minimum(y) - 1e-5)
+            y .-= (minimum(y) - 1e-9)
         end
         if i == 1
             pti = plot(
@@ -136,11 +145,13 @@ function plot_trajectories(
                 yaxis=:log,
                 yguidefontsize=12,
                 xguidefontsize=12,
-                width=width,
+                width=(width + 0.01 * i),
+                alpha=1,
                 linestyle=lstyle[i],
+                color=colors[i],
             )
         else
-            plot!(x, y, label=label[i], width=width, linestyle=lstyle[i])
+            plot!(pti, x, y, label=label[i], width=(width + 0.01 * i), linestyle=lstyle[i], color=colors[i], alpha=1)
         end
     end
     for i in 1:length(data)
@@ -159,11 +170,13 @@ function plot_trajectories(
                 xlabel=L"\textrm{Iterations}",
                 yguidefontsize=12,
                 xguidefontsize=12,
-                width=width,
+                width=(width + 0.01 * i),
+                alpha=1,
                 linestyle=lstyle[i],
+                color=colors[i],
             )
         else
-            plot!(x, y, label=label[i], width=width, linestyle=lstyle[i])
+            plot!(dit, x, y, label=label[i], width=(width + 0.01 * i), alpha=1, linestyle=lstyle[i], color=colors[i])
         end
     end
     for i in 1:length(data)
@@ -178,20 +191,30 @@ function plot_trajectories(
                 legend=false,
                 xaxis=xscale,
                 yaxis=:log,
-                xlabel=L"\textrm{Time}",
+                xlabel=L"\textrm{Time (s)}",
                 yguidefontsize=12,
                 xguidefontsize=12,
-                width=width,
+                width=(width + 0.01 * i),
+                alpha=1,
                 linestyle=lstyle[i],
+                color=colors[i],
             )
         else
-            plot!(x, y, label=label[i], width=width, linestyle=lstyle[i])
+            plot!(dti, x, y, label=label[i], width=(width + 0.01 * i), linestyle=lstyle[i], alpha=1, color=colors[i])
         end
     end
     fp = plot(pit, pti, dit, dti, layout=(2, 2)) # layout = @layout([A{0.01h}; [B C; D E]]))
-    plot!(size=(600, 400))
+    plot!(fp, size=(600, 400))
     if filename !== nothing
         savefig(fp, filename)
     end
-    return fp
+    pit_p = plot(pit)
+    xlabel!(pit_p, L"\textrm{Iterations}")
+    pti_p = plot(pti)
+    xlabel!(pti_p, L"\textrm{Time (s)}")
+    fp_primal = plot(pit_p, pti_p, layout=(1, 2)) # layout = @layout([A{0.01h}; [B C; D E]]))
+    plot!(fp_primal, size=(600, 300))
+    fp_dual = plot(plot(dit, legend_position=true), plot(dti), layout=(1, 2)) # layout = @layout([A{0.01h}; [B C; D E]]))
+    plot!(fp_dual, size=(600, 300))
+    return fp, fp_primal, fp_dual
 end
