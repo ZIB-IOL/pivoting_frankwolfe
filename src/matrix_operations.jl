@@ -37,10 +37,9 @@ function matrix_pruning!(M, λ, F; maxerrortol=1e-8)
         end
     end
     nrefactor = 0
-    
     for i in eachindex(λ)
         if M[n+1,i] == 0.0 && λ[i] <= 0.0
-            M[:,i] = M[:,i] + M[:,k]
+            M[:,i] += M[:,k]
             # update factorization
             nrefactor += update_factorized_object(F, M[:,i], i, M, maxerrortol=maxerrortol)
         end
@@ -112,28 +111,30 @@ function fw_update!(M, F, v, λ, η, k_v = 0; full_solve=false)
     if k_v ≠ 0
         k = k_v
         r = similar(λ)
+        nfactors = 0
     else # k_v == 0
         # r = -M⁻¹ vs
+        nfactors = Int(full_solve)
         r = if full_solve
             -M \ collect(vs)
         else
             -BasicLU.solve(F, vs, 'N')
         end
-        if norm(M * r + vs) > 1e-9
-            @error("Sparse linear system could not be solved")
-            @show "full $full_solve"
-            @show det(M)
-            @show (norm(M * r + vs))
-            @show norm(M *  (M \ collect(vs)) - vs)
+        if norm(M * r + vs) > 1e-8
+            # fatal, logging everything before erroring
+            @info "full $full_solve"
+            @info det(M)
+            @info (norm(M * r + vs))
+            @info norm(M *  (M \ collect(vs)) - vs)
             r2 = -M\collect(vs)
-            @show norm(r-r2)
+            @info norm(r-r2)
             error(norm(M * r + vs))
         end
         # θ, k = findmin(r[i] < 0 ? -λ[i] / r[i] : Inf for i in 1:n)
         θ = Inf
         k = 0
         @inbounds for i in eachindex(r)
-            if r[i] < -1e-10
+            if r[i] < -1e-9
                 val = -λ[i] / r[i]
                 if val < θ
                     θ = val
@@ -141,23 +142,11 @@ function fw_update!(M, F, v, λ, η, k_v = 0; full_solve=false)
                 end
             end
         end
-        # @show [(i, -λ[i] / r[i]) for i in eachindex(λ) if r[i] < 0]
-        # @show [(i, -λ[i] / r[i], r[i]) for i in eachindex(λ) if r[i] < -1e-10]
-        # @show k
-        # @show θ
-        # @show sparse(r)
-        # @show sparse(λ)
-        @debug begin
-            for j in 1:size(M, 2)
-                @assert abs(dot(M[:,j], vs) / norm(vs) / norm(M[:,j])) < 0.999 "$(dot(M[:,j], vs)) $(vs) $(M[:,j])"
-            end
-        end
         @view(M[:,k]) .= 0
         nz_indices = SparseArrays.nonzeroinds(vs)
         @inbounds for idx in nz_indices
             M[idx, k] = vs[idx]
         end
-    
         # λ <- λ + r θ
         @inbounds for idx in eachindex(r)
             if r[idx] ≉ 0
@@ -176,11 +165,12 @@ function fw_update!(M, F, v, λ, η, k_v = 0; full_solve=false)
         end
     end
     s = sum(λ)
-    if abs(s - 1) >= 1e-9
+    if abs(s - 1) >= 1e-10
         @warn "non simplex $(abs(s - 1))"
         λ ./= s
     end
-    return k, matrix_pruning!(M, λ, F)
+    nfactors += matrix_pruning!(M, λ, F)
+    return k, nfactors
 end
 
 function standardize(v::Vector)

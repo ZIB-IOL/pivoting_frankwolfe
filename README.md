@@ -18,14 +18,13 @@ Pkg.update()
 import PivotingFrankWolfe
 ```
 
-See the [Julia documentation](https://docs.julialang.org/en/v1/stdlib/Pkg/) for more detail on working with the Julia package manager.
+See the [Julia documentation](https://docs.julialang.org/en/v1/stdlib/Pkg/) for more details on working with the Julia package manager.
 
 ## Adding experiment data
 
 Due to file sizes, the largest experiment datasets are not added to the repository.
 They can be found at the following location and added in the corresponding folders:
 
-- **Portfolio**: the instances are in MAT format, archived on [Zenodo](https://zenodo.org/record/4836009) and can be added to `experiments/portfolio`.
 - **Logistic regression**: the validation set used in the paper is already present. The training set is available on the [UCI ML repository](https://archive.ics.uci.edu/ml/datasets/Gisette) and can be added to `experiments/GISETTE`.
 
 ## Running the paper experiments
@@ -34,7 +33,7 @@ The experiments are scripts are run with:
 
 ```bash
 julia --project experiments/run_logreg.jl
-julia --project experiments/run_portfolio.jl
+julia --project experiments/run_birkhoff.jl
 julia --project experiments/run_signal_recovery.jl
 ```
 
