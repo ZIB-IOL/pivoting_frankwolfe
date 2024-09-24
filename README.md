@@ -2,9 +2,7 @@
 
 ## References
 
-This is the accompanying repository for the paper:
-
-> Wirth, E., Besançon, M., and Pokutta, S. (2023). The Pivoting Framework: Frank-Wolfe Algorithms with Active Set Size Control.
+This is the accompanying repository for the submitted paper.
 
 ## Installation guide
 
