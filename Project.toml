@@ -1,6 +1,6 @@
 name = "PivotingFrankWolfe"
 uuid = "60583d18-e443-4e90-b00a-4482861f2acc"
-authors = ["ZIB AISST"]
+authors = ["Submission"]
 version = "0.1.0"
 
 [deps]
